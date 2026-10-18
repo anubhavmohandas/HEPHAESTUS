@@ -53,8 +53,7 @@
 
   <!-- Security engine -->
   <rect class="engine" x="40" y="210" width="1200" height="335" rx="14"/>
-  <text class="eng" x="62" y="236">SECURITY ENGINE</text>
-  <text class="mono" x="196" y="236">backend/app/security</text>
+  <text x="62" y="236"><tspan class="eng">SECURITY ENGINE</tspan><tspan class="mono" dx="14">backend/app/security</tspan></text>
 
   <rect class="data" x="70" y="255" width="330" height="130" rx="10"/>
   <text class="h" x="90" y="286">Attack library</text>
@@ -92,13 +91,13 @@
   <circle class="badge" cx="94" cy="446" r="13"/><text class="bn" x="94" y="450">6</text>
   <text class="h" x="116" y="451">Scenario check</text>
   <text class="t" x="90" y="474">Did the harmful outcome happen?</text>
-  <text class="t" x="90" y="494">secret leaked · instruction obeyed ·</text>
+  <text class="t" x="90" y="494">secret leaked · injection obeyed ·</text>
   <text class="t" x="90" y="514">forbidden tool called</text>
 
   <rect class="box" x="475" y="420" width="330" height="105" rx="10"/>
   <circle class="badge" cx="499" cy="446" r="13"/><text class="bn" x="499" y="450">7</text>
   <text class="h" x="521" y="451">Policy enforcer</text>
-  <text class="t" x="495" y="474">Independent second scan of each reply:</text>
+  <text class="t" x="495" y="474">Independent scan of every reply:</text>
   <text class="t" x="495" y="494">keys · passwords · PII ·</text>
   <text class="t" x="495" y="514">system files · jailbreak phrases</text>
 
@@ -119,7 +118,7 @@
   <circle class="badge" cx="904" cy="616" r="13"/><text class="bn" x="904" y="620">9</text>
   <text class="h" x="926" y="621">Saved</text>
   <text class="mono" x="900" y="648">SQLite · hephaestus.db</text>
-  <text class="t" x="900" y="670">results + full request/response evidence</text>
+  <text class="t" x="900" y="670">results + full evidence per attack</text>
 
   <rect class="box" x="475" y="590" width="330" height="95" rx="10"/>
   <circle class="badge" cx="499" cy="616" r="13"/><text class="bn" x="499" y="620">10</text>
