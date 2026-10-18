@@ -1,12 +1,172 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
-import type { DashboardStats, TestRun } from "../api/client";
+import type { DashboardStats, Target, TestRun } from "../api/client";
 import { PageHeader } from "../components/Layout";
 import {
   StatCard, PassRateGauge, StatusBadge, Card, Button, Spinner, ErrorBanner, EmptyState,
 } from "../components/ui";
 import { colors, font } from "../tokens";
+
+// ─── Quick-run target picker ──────────────────────────────────────────────────
+
+function RunButton({ onRun }: { onRun: (targetId?: string) => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [targets, setTargets] = useState<Target[]>([]);
+  const [running, setRunning] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Load targets when dropdown opens
+  useEffect(() => {
+    if (!open) return;
+    api.targets.list().then(setTargets).catch(() => setTargets([]));
+  }, [open]);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const fire = async (targetId?: string) => {
+    setOpen(false);
+    setRunning(true);
+    try { await onRun(targetId); } finally { setRunning(false); }
+  };
+
+  const mockTargets = targets.filter(t => t.target_type === "mock");
+  const realTargets = targets.filter(t => t.target_type === "openai");
+
+  return (
+    <div ref={ref} style={{ position: "relative", display: "inline-flex" }}>
+      {/* Main button */}
+      <Button
+        variant="primary"
+        loading={running}
+        icon={<span>▶</span>}
+        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0, borderRight: "1px solid #5a4020" }}
+        onClick={() => fire()}
+      >
+        Run Full Assessment
+      </Button>
+      {/* Caret to open picker */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          background: "#c8a028", border: "none", borderTopRightRadius: 4,
+          borderBottomRightRadius: 4, padding: "0 8px",
+          cursor: "pointer", color: "#1a1000", fontSize: 10, fontWeight: 700,
+        }}
+        title="Choose target"
+      >
+        ▾
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 4px)", right: 0, zIndex: 100,
+          background: "#1c1410", border: "1px solid #4a3020",
+          borderRadius: 6, minWidth: 260, boxShadow: "0 4px 16px rgba(0,0,0,0.6)",
+          overflow: "hidden",
+        }}>
+          <div style={{ padding: "8px 12px", borderBottom: "1px solid #2a1e10", fontSize: font.size.xs, color: colors.textMuted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+            Select target to run against
+          </div>
+
+          {/* Default (auto-pick mock baseline) */}
+          <PickerItem
+            label="Default (Mock Baseline)"
+            sub="Auto-selects baseline mock target"
+            badge="mock"
+            badgeColor="#c8a028"
+            onClick={() => fire()}
+          />
+
+          {mockTargets.length > 0 && (
+            <>
+              <div style={{ padding: "6px 12px 2px", fontSize: font.size.xs, color: "#5a4a30", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Mock Targets
+              </div>
+              {mockTargets.map(t => (
+                <PickerItem
+                  key={t.id}
+                  label={t.name}
+                  sub={t.is_hardened ? "Hardened — defenses active" : "Baseline — no defenses"}
+                  badge={t.is_hardened ? "hardened" : "baseline"}
+                  badgeColor={t.is_hardened ? "#4a8a4a" : "#c8a028"}
+                  onClick={() => fire(t.id)}
+                />
+              ))}
+            </>
+          )}
+
+          {realTargets.length > 0 && (
+            <>
+              <div style={{ padding: "6px 12px 2px", fontSize: font.size.xs, color: "#5a4a30", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Real API Targets
+              </div>
+              {realTargets.map(t => (
+                <PickerItem
+                  key={t.id}
+                  label={t.name}
+                  sub={String(t.config.model ?? "openai")}
+                  badge="real"
+                  badgeColor="#3b82d4"
+                  onClick={() => fire(t.id)}
+                />
+              ))}
+            </>
+          )}
+
+          {targets.length === 0 && (
+            <div style={{ padding: "10px 12px", fontSize: font.size.xs, color: colors.textMuted }}>
+              Loading…
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PickerItem({ label, sub, badge, badgeColor, onClick }: {
+  label: string; sub: string; badge: string; badgeColor: string; onClick: () => void;
+}) {
+  const [hover, setHover] = useState(false);
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        padding: "9px 12px", cursor: "pointer",
+        background: hover ? "#261e14" : "transparent",
+        display: "flex", alignItems: "center", gap: 10,
+        transition: "background 0.1s",
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: font.size.sm, color: colors.textPrimary, fontWeight: 500 }}>{label}</div>
+        <div style={{ fontSize: font.size.xs, color: colors.textMuted, marginTop: 1 }}>{sub}</div>
+      </div>
+      <span style={{
+        padding: "1px 7px", borderRadius: 3, fontSize: 10,
+        fontFamily: font.mono, color: badgeColor,
+        background: badgeColor + "18", border: `1px solid ${badgeColor}44`,
+        flexShrink: 0,
+      }}>
+        {badge}
+      </span>
+    </div>
+  );
+}
+
+// ─── Dashboard Page ───────────────────────────────────────────────────────────
 
 export function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -24,9 +184,12 @@ export function DashboardPage() {
 
   useEffect(() => { load(); }, []);
 
-  const runAll = async () => {
+  const runAll = async (targetId?: string) => {
     try {
-      const run = await api.runs.create({ run_name: "Quick Assessment" });
+      const run = await api.runs.create({
+        run_name: "Quick Assessment",
+        ...(targetId ? { target_id: targetId } : {}),
+      });
       navigate(`/runs/${run.id}`);
     } catch (e: any) {
       setError(e.message);
@@ -38,11 +201,7 @@ export function DashboardPage() {
       <PageHeader
         title="Security Dashboard"
         subtitle="Overview of AI security posture across all test runs"
-        action={
-          <Button variant="primary" onClick={runAll} icon={<span>▶</span>}>
-            Run Full Assessment
-          </Button>
-        }
+        action={<RunButton onRun={runAll} />}
       />
 
       <div style={{ padding: "28px 32px", flex: 1, overflowY: "auto" }}>
@@ -158,9 +317,16 @@ export function DashboardPage() {
               lineHeight: 1.7,
             }}>
               <strong style={{ color: "#7a6a40" }}>⚠ Scope &amp; Limitations:</strong>{" "}
-              Results shown are from the built-in mock target and demonstrate simulated AI behavior.
-              They do not certify the security of any real AI application.
-              Synthetic secrets used in tests are FAKE values — no real credentials are ever present.
+              By default, runs use the built-in mock target (deterministic simulator).
+              To test a real AI application, add a target on the{" "}
+              <span
+                style={{ color: "#c8a028", cursor: "pointer", textDecoration: "underline" }}
+                onClick={() => navigate("/targets")}
+              >
+                Targets page
+              </span>{" "}
+              and select it from the ▾ dropdown next to this button.
+              Synthetic secrets in mock results are FAKE values — no real credentials are ever present.
             </div>
           </>
         )}

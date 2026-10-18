@@ -13,6 +13,7 @@ from app.security.scenarios.base import BaseScenario, ScenarioResult
 from app.security.policies.enforcer import PolicyEnforcer, default_enforcer
 from app.security.targets.base import BaseTarget
 from app.security.targets.mock_target import MockAITarget
+from app.security.targets.openai_target import OpenAITarget
 from app.security.scenarios.prompt_injection import PROMPT_INJECTION_SCENARIOS, INFORMATION_LEAKAGE_SCENARIOS as PI_IL
 from app.security.scenarios.information_leakage import INFORMATION_LEAKAGE_SCENARIOS
 from app.security.scenarios.tool_exploitation import UNAUTHORIZED_TOOL_SCENARIOS
@@ -202,7 +203,9 @@ def create_target(target_type: str, hardened: bool, config: Dict[str, Any]) -> B
     """Factory for creating target instances from configuration."""
     if target_type == "mock":
         return MockAITarget(hardened=hardened, config=config)
-    raise ValueError(f"Unknown target type: {target_type}. Supported: mock")
+    if target_type == "openai":
+        return OpenAITarget(hardened=hardened, config=config)
+    raise ValueError(f"Unknown target type: {target_type}. Supported: mock, openai")
 
 
 def build_default_suites() -> Dict[str, List[str]]:
