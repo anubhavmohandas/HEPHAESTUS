@@ -35,18 +35,21 @@ Everything runs on your own machine. You don't need paid APIs or an internet con
 
 ## How it works
 
-```
-  ┌────────────┐   attack payload   ┌──────────────┐
-  │  Scenario  │ ─────────────────▶ │    Target    │  (mock bot or real LLM)
-  │  (PI-001…) │ ◀───────────────── │              │
-  └─────┬──────┘      response      └──────────────┘
-        │
-        ▼
-  Scenario's own check ──▶ Policy Enforcer scan ──▶ PASSED / FAILED / ERROR
-                         (secrets, PII, injection,          │
-                          system files, jailbreaks)         ▼
-                                                 SQLite DB ──▶ Dashboard + JSON/HTML report
-```
+![HEPHAESTUS architecture: you start a run in the React UI, the FastAPI backend's test runner sends each attack from the library to the target, every reply is judged by the scenario's own check and then by the independent policy enforcer, and the verdict is saved to SQLite, shown on the dashboard and exported as a JSON or HTML report.](docs/architecture.svg)
+
+Follow the numbers in the picture:
+
+1. **You** pick a suite of attacks and a target in the browser.
+2. The **frontend** (React) sends the request
+3. to the **backend API** (FastAPI), which starts the run.
+4. The **test runner** takes each attack from the **attack library** and
+5. sends it to the **target**: the mock bot, or a real LLM.
+6. The **scenario check** looks at the reply: did the harmful thing actually happen?
+7. The **policy enforcer** independently scans the same reply for leaked keys, PII and jailbreak signs, and can turn a pass into a fail.
+8. The **verdict** is decided,
+9. **saved** to SQLite with the full evidence,
+10. **shown** on the dashboard,
+11. and can be **exported** as a JSON or HTML report.
 
 **How to read a result**
 
@@ -218,6 +221,7 @@ HEPHAESTUS/
 │   │       ├── policies/         enforcer.py, the independent output scanner
 │   │       └── runner.py         Runs scenarios against a target and collects results
 │   └── tests/                    pytest suite
+├── docs/architecture.svg         The architecture diagram above
 └── frontend/                     React · TypeScript · Vite
     └── src/
         ├── pages/                Dashboard, Scenarios, Suites, Runs, Targets

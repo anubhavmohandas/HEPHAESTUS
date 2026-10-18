@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title>HEPHAESTUS architecture: how a security test run flows</title>
+  <style>
+    .bg     { fill: #ffffff; stroke: #e5e7eb; }
+    .box    { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; }
+    .data   { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 5 4; }
+    .engine { fill: #fff7ed; stroke: #fb923c; stroke-width: 1.5; stroke-dasharray: 7 5; }
+    .h1     { font-size: 22px; font-weight: 700; fill: #111827; }
+    .h      { font-size: 16px; font-weight: 700; fill: #111827; }
+    .t      { font-size: 13px; fill: #475569; }
+    .mono   { font-size: 12px; fill: #9a3412; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .lbl    { font-size: 12px; fill: #64748b; font-style: italic; }
+    .eng    { font-size: 12px; font-weight: 700; fill: #c2410c; letter-spacing: 1.5px; }
+    .badge  { fill: #ea580c; }
+    .bn     { font-size: 12px; font-weight: 700; fill: #ffffff; text-anchor: middle; }
+    .ar     { fill: none; stroke: #64748b; stroke-width: 1.8; marker-end: url(#a); }
+    .pass   { font-size: 13px; font-weight: 600; fill: #15803d; }
+    .fail   { font-size: 13px; font-weight: 600; fill: #b91c1c; }
+    .err    { font-size: 13px; font-weight: 600; fill: #64748b; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0.5" y="0.5" width="1279" height="719" rx="16"/>
+  <text class="h1" x="40" y="50">How a HEPHAESTUS test run works</text>
+
+  <!-- Row 1: user → frontend → API -->
+  <rect class="box" x="40" y="80" width="300" height="90" rx="10"/>
+  <circle class="badge" cx="64" cy="106" r="13"/><text class="bn" x="64" y="110">1</text>
+  <text class="h" x="86" y="111">You</text>
+  <text class="t" x="60" y="138">Pick a suite of attacks and a target</text>
+  <text class="t" x="60" y="157">in the UI, then click Run.</text>
+
+  <rect class="box" x="490" y="80" width="300" height="90" rx="10"/>
+  <circle class="badge" cx="514" cy="106" r="13"/><text class="bn" x="514" y="110">2</text>
+  <text class="h" x="536" y="111">Frontend</text>
+  <text class="t" x="510" y="138">React + TypeScript + Vite</text>
+  <text class="mono" x="510" y="157">localhost:5173</text>
+
+  <rect class="box" x="940" y="80" width="300" height="90" rx="10"/>
+  <circle class="badge" cx="964" cy="106" r="13"/><text class="bn" x="964" y="110">3</text>
+  <text class="h" x="986" y="111">Backend API</text>
+  <text class="t" x="960" y="138">FastAPI REST · starts the run</text>
+  <text class="mono" x="960" y="157">localhost:8000/api</text>
+
+  <path class="ar" d="M340,125 H487"/>
+  <path class="ar" d="M790,125 H937"/>
+  <path class="ar" d="M1090,170 V192 H640 V252"/>
+  <text class="lbl" x="850" y="186">start run</text>
+
+  <!-- Security engine -->
+  <rect class="engine" x="40" y="210" width="1200" height="335" rx="14"/>
+  <text class="eng" x="62" y="236">SECURITY ENGINE</text>
+  <text class="mono" x="196" y="236">backend/app/security</text>
+
+  <rect class="data" x="70" y="255" width="330" height="130" rx="10"/>
+  <text class="h" x="90" y="286">Attack library</text>
+  <text class="t" x="90" y="311">28 attacks in 6 categories:</text>
+  <text class="t" x="90" y="331">prompt injection · info leakage ·</text>
+  <text class="t" x="90" y="351">tool abuse · policy violation ·</text>
+  <text class="t" x="90" y="371">malformed output · override</text>
+
+  <rect class="box" x="475" y="255" width="330" height="130" rx="10"/>
+  <circle class="badge" cx="499" cy="281" r="13"/><text class="bn" x="499" y="285">4</text>
+  <text class="h" x="521" y="286">Test runner</text>
+  <text class="t" x="495" y="311">Takes each attack in the suite,</text>
+  <text class="t" x="495" y="331">sends it to the target and</text>
+  <text class="t" x="495" y="351">collects the reply.</text>
+  <text class="mono" x="495" y="371">runner.py</text>
+
+  <rect class="box" x="880" y="255" width="330" height="130" rx="10"/>
+  <circle class="badge" cx="904" cy="281" r="13"/><text class="bn" x="904" y="285">5</text>
+  <text class="h" x="926" y="286">Target under test</text>
+  <text class="t" x="900" y="311">Mock Baseline: no defences</text>
+  <text class="t" x="900" y="331">Mock Hardened: defences on</text>
+  <text class="t" x="900" y="351">Real LLM: OpenAI · Azure ·</text>
+  <text class="t" x="900" y="371">Ollama · LM Studio</text>
+
+  <path class="ar" d="M400,320 H472"/>
+  <text class="lbl" x="412" y="311">attacks</text>
+  <path class="ar" d="M805,300 H877"/>
+  <text class="lbl" x="815" y="291">payload</text>
+  <path class="ar" d="M880,345 H808"/>
+  <text class="lbl" x="826" y="364">reply</text>
+
+  <path class="ar" d="M640,385 V402 H235 V417"/>
+
+  <rect class="box" x="70" y="420" width="330" height="105" rx="10"/>
+  <circle class="badge" cx="94" cy="446" r="13"/><text class="bn" x="94" y="450">6</text>
+  <text class="h" x="116" y="451">Scenario check</text>
+  <text class="t" x="90" y="474">Did the harmful outcome happen?</text>
+  <text class="t" x="90" y="494">secret leaked · instruction obeyed ·</text>
+  <text class="t" x="90" y="514">forbidden tool called</text>
+
+  <rect class="box" x="475" y="420" width="330" height="105" rx="10"/>
+  <circle class="badge" cx="499" cy="446" r="13"/><text class="bn" x="499" y="450">7</text>
+  <text class="h" x="521" y="451">Policy enforcer</text>
+  <text class="t" x="495" y="474">Independent second scan of each reply:</text>
+  <text class="t" x="495" y="494">keys · passwords · PII ·</text>
+  <text class="t" x="495" y="514">system files · jailbreak phrases</text>
+
+  <rect class="box" x="880" y="420" width="330" height="105" rx="10"/>
+  <circle class="badge" cx="904" cy="446" r="13"/><text class="bn" x="904" y="450">8</text>
+  <text class="h" x="926" y="451">Verdict</text>
+  <text class="pass" x="900" y="474">● PASSED: AI resisted the attack</text>
+  <text class="fail" x="900" y="494">● FAILED: AI was fooled (finding)</text>
+  <text class="err"  x="900" y="514">● ERROR: test could not run</text>
+
+  <path class="ar" d="M400,470 H472"/>
+  <path class="ar" d="M805,470 H877"/>
+
+  <!-- Bottom row: storage → UI → export -->
+  <path class="ar" d="M1045,525 V587"/>
+
+  <rect class="box" x="880" y="590" width="330" height="95" rx="10"/>
+  <circle class="badge" cx="904" cy="616" r="13"/><text class="bn" x="904" y="620">9</text>
+  <text class="h" x="926" y="621">Saved</text>
+  <text class="mono" x="900" y="648">SQLite · hephaestus.db</text>
+  <text class="t" x="900" y="670">results + full request/response evidence</text>
+
+  <rect class="box" x="475" y="590" width="330" height="95" rx="10"/>
+  <circle class="badge" cx="499" cy="616" r="13"/><text class="bn" x="499" y="620">10</text>
+  <text class="h" x="521" y="621">Results in the UI</text>
+  <text class="t" x="495" y="648">Dashboard: pass rate by category</text>
+  <text class="t" x="495" y="670">and severity · evidence per attack</text>
+
+  <rect class="box" x="70" y="590" width="330" height="95" rx="10"/>
+  <circle class="badge" cx="94" cy="616" r="13"/><text class="bn" x="94" y="620">11</text>
+  <text class="h" x="116" y="621">Export report</text>
+  <text class="t" x="90" y="648">JSON or HTML with all evidence,</text>
+  <text class="t" x="90" y="670">ready to share</text>
+
+  <path class="ar" d="M880,637 H808"/>
+  <path class="ar" d="M475,637 H403"/>
+</svg>
