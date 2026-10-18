@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 def seed_scenarios(db: Session) -> None:
-    existing = {s.scenario_id for s in db.query(TestScenario.scenario_id).all()}
+    existing = {s.scenario_id for s in db.query(TestScenario).with_entities(TestScenario.scenario_id).all()}
     added = 0
     for scenario in ALL_SCENARIOS:
         if scenario.id not in existing:

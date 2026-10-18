@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api, Target } from "../api/client";
+import { api } from "../api/client";
+import type { Target } from "../api/client";
 import { PageHeader } from "../components/Layout";
-import { Card, Button, Spinner, ErrorBanner, EmptyState, Toast } from "../components/ui";
+import { Button, Spinner, ErrorBanner, EmptyState, Toast } from "../components/ui";
 import { colors, font } from "../tokens";
 
 export function TargetsPage() {

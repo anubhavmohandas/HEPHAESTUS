@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api, DashboardStats, TestRun } from "../api/client";
+import { api } from "../api/client";
+import type { DashboardStats, TestRun } from "../api/client";
 import { PageHeader } from "../components/Layout";
 import {
   StatCard, PassRateGauge, StatusBadge, Card, Button, Spinner, ErrorBanner, EmptyState,

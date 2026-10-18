@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api, Suite, SuiteDetail, Target } from "../api/client";
+import { api } from "../api/client";
+import type { Suite, SuiteDetail, Target } from "../api/client";
 import { PageHeader } from "../components/Layout";
 import {
-  Card, Button, Spinner, ErrorBanner, EmptyState, SeverityBadge, CategoryBadge, Toast,
+  Button, Spinner, ErrorBanner, EmptyState, SeverityBadge, CategoryBadge, Toast,
 } from "../components/ui";
 import { colors, font } from "../tokens";
 

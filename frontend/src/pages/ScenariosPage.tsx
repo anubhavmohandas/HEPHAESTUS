@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { api, Scenario } from "../api/client";
+import { api } from "../api/client";
+import type { Scenario } from "../api/client";
 import { PageHeader } from "../components/Layout";
 import {
-  SeverityBadge, CategoryBadge, Card, Button, Input, Select,
+  SeverityBadge, CategoryBadge, Button, Input, Select,
   Spinner, ErrorBanner, EmptyState,
 } from "../components/ui";
 import { colors, font } from "../tokens";

@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { api, TestRun, RunDetail, TestResult } from "../api/client";
+import { api } from "../api/client";
+import type { TestRun, RunDetail, TestResult } from "../api/client";
 import { PageHeader } from "../components/Layout";
 import {
   StatusBadge, SeverityBadge, CategoryBadge, Card, Button,
-  PassRateGauge, Spinner, ErrorBanner, EmptyState, Toast,
+  PassRateGauge, Spinner, ErrorBanner, EmptyState,
 } from "../components/ui";
 import { colors, font } from "../tokens";
 
@@ -168,7 +169,6 @@ export function RunDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "passed" | "failed" | "error">("all");
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const navigate = useNavigate();
 
@@ -199,10 +199,6 @@ export function RunDetailPage() {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [id]);
 
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const downloadJson = () => {
     if (!id) return;
@@ -230,7 +226,6 @@ export function RunDetailPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {toast && <Toast message={toast} type="success" />}
       <PageHeader
         breadcrumb="Test Runs"
         title={run.run_name ?? `Run ${run.id.slice(0, 12)}`}

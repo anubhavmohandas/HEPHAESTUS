@@ -1,8 +1,9 @@
 /**
  * HEPHAESTUS API client — typed wrappers around the FastAPI backend.
+ * Always targets port 8000 on whatever host the frontend is on.
  */
 
-const BASE = "http://localhost:8000/api";
+const BASE = `${window.location.protocol}//${window.location.hostname}:8000/api`;
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {

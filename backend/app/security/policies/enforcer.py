@@ -18,8 +18,9 @@ class PolicyViolation:
     policy_name: str
     severity: str
     description: str
-    matched_text: Optional[str] = None
+    matched_text: Optional[str] = None   # Redacted version for safe storage
     pattern: Optional[str] = None
+    _raw_match: Optional[str] = None     # Full unredacted match (not serialized)
 
 
 @dataclass
@@ -136,12 +137,12 @@ class PolicyEnforcer:
         if self.check_injections:
             violations.extend(self._check_patterns(text, self.INJECTION_OUTPUT_PATTERNS))
         if self.check_pii:
-            pii_violations = self._check_patterns(text, self.PII_PATTERNS)
-            # Apply email whitelist
+            pii_violations = self._check_patterns_with_raw(text, self.PII_PATTERNS)
+            # Apply email whitelist — compare against raw (unredacted) match
             if self.email_whitelist:
                 pii_violations = [
                     v for v in pii_violations
-                    if not any(wl in (v.matched_text or "") for wl in self.email_whitelist)
+                    if not any(wl in (v._raw_match or "") for wl in self.email_whitelist)
                 ]
             violations.extend(pii_violations)
         if self.check_system_files:
@@ -160,14 +161,21 @@ class PolicyEnforcer:
         text: str,
         patterns: List[tuple],
     ) -> List[PolicyViolation]:
+        return self._check_patterns_with_raw(text, patterns)
+
+    def _check_patterns_with_raw(
+        self,
+        text: str,
+        patterns: List[tuple],
+    ) -> List[PolicyViolation]:
         found = []
         for pattern, policy_id, policy_name, severity in patterns:
             match = re.search(pattern, text, re.IGNORECASE)
             if match:
-                # Redact the matched text for storage (don't log actual secrets)
-                matched = match.group(0)
-                if len(matched) > 8:
-                    redacted = matched[:4] + "***" + matched[-2:]
+                raw = match.group(0)
+                # Redact for safe storage — never log actual secrets
+                if len(raw) > 8:
+                    redacted = raw[:4] + "***" + raw[-2:]
                 else:
                     redacted = "***"
                 found.append(PolicyViolation(
@@ -177,6 +185,7 @@ class PolicyEnforcer:
                     description=f"Pattern '{policy_id}' matched in AI output",
                     matched_text=redacted,
                     pattern=pattern,
+                    _raw_match=raw,
                 ))
         return found
 
